@@ -1,0 +1,235 @@
+@import url('https://fonts.googleapis.com/css?family=Chivo|Lora|Space+Mono:700&display=swap');
+
+* {
+  box-sizing: border-box
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Lora';
+  line-height: 1.6;
+  /*color: #666;*/
+  background: #f9f6ee;;
+}
+
+#results {
+  max-width: 1200px;
+  margin: 0 auto;
+  --color-publisher: turquoise;
+  --color-dataset: lightgray;
+  --color-tool: salmon;
+  --color-portal: lightseagreen;
+  --color-collection: cadetblue;
+}
+
+h1 {
+  text-align: center;
+  padding: 1.5rem 2.5rem;
+  background: lightseagreen;
+  margin: 0 0 2rem 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+h3 {
+  text-align: left;
+  padding: 1.0rem;
+  /*background-image: linear-gradient(120deg, linen 0%, lightgray 100%);*/
+  margin: 0;
+  font-size: 1.0rem;
+  color: darkslategray;
+}
+
+h4 {
+  text-align: left;
+  padding: 1.0rem;
+  margin: 0;
+  font-size: 1.0rem;
+  color: darkslategray;
+}
+
+h5 {
+  text-align: left;
+  padding: 0.1rem;
+  background: darkslategray;
+  margin: 0 0.5rem 0.5rem;
+  font-size: 0.2rem;
+  color: darkslategray;
+}
+
+h6 {
+  text-align: left;
+  padding: 0.1rem;
+  margin: 0 0.5rem 0.5rem;
+  font-size: 1.2rem;
+  color: white;
+}
+
+p {
+  text-align: left;
+  padding: 0.1rem;
+  margin: 0 0.5rem 0.5rem;
+  font-size: 1.1rem;
+}
+
+.iconbox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.75em;
+}
+
+.iconbox img {
+  margin: auto;
+  align-content: left;
+}
+
+icontext {
+  color: darkslategray;
+  font-size: 1.2rem;
+  font-family: "Chivo";
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  align-content: right;
+  /*padding: 0 0 1.0rem 1.0rem;*/
+  position: absolute;
+
+}
+
+canvas {
+  max-width: 85%;
+  max-height: 100%;
+  font-family: "Chivo";
+  text-align: right;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.input {
+  margin: 1rem;
+  padding: 1.5rem 2.5rem;
+  background: white;
+  box-shadow: 2px 4px 25px rgba(0, 0, 0, .1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card {
+  margin: 1rem;
+  background: white;
+  box-shadow: 2px 4px 25px rgba(0, 0, 0, .1);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all .2s linear;
+  width: 85%;
+
+}
+
+.card:hover {
+  box-shadow: 2px 8px 45px rgba(0, 0, 0, .15);
+  transform: translate3D(0, -2px, 0);
+}
+
+@media screen and (min-width: 600px) {
+  .card {
+    flex: 1 1 calc(50% - 2rem);
+  }
+}
+
+@media screen and (min-width: 900px) {
+  .card {
+    flex: 1 1 calc(33% - 2rem);
+  }
+}
+
+.card:nth-child(2n) h1 {
+  background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+}
+
+.card:nth-child(4n) h1 {
+  background-image: linear-gradient(120deg, #ff9a9e 0%, #fecfef 100%);
+}
+
+.card:nth-child(5n) h1 {
+  background-image: linear-gradient(120deg, #ffc3a0 0%, #ffafbd 100%);
+}
+
+/* Container needed to position the button. Adjust the width as needed */
+.character {
+  position: relative;
+  width: 50%;
+}
+
+/* Make the image responsive */
+.character img {
+  width: 100%;
+  height: auto;
+}
+
+/* Style the button and place it in the middle of the container/image */
+.character .btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  background-color: #555;
+  color: white;
+  font-size: 16px;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.character .btn:hover {
+  background-color: black;
+}
+
+.disabled {
+  opacity: 0.7;
+  border-style: inset;
+  font-style: italic;
+}
+
+/* Three image containers (use 25% for four, and 50% for two, etc) */
+.column {
+  float: left;
+  width: 33.33%;
+  padding: 5px;
+}
+
+/* Clear floats after image containers */
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.imgHolder {
+  position: relative;
+  text-align:center;
+}
+.imgHolder span {
+  color: white;
+  position: absolute;
+  right: 60%;
+  top: 75%;
+}
+
+/* Different hero image for D2 tracker */
+.hero-image {
+  background-image: url('https://github.com/jargonautical/hero_images/raw/master/Screenshot_57.jpg');
+  height: 100px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
+  padding: 10px;
+  margin: 10px;
+}

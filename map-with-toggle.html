@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Show and hide layers</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<!-- MapBoxGL reqs and script -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.css' rel='stylesheet' />
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+<script src="https://npmcdn.com/csv2geojson@latest/csv2geojson.js"></script>
+<script src='scripts/togeojson.js'></script>
+<style>
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+</style>
+<div class='hero-image'></div>
+</head>
+<body>
+<style>
+#menu {
+background: #fff;
+position: absolute;
+z-index: 1;
+top: 10px;
+right: 10px;
+border-radius: 3px;
+width: 120px;
+border: 1px solid rgba(0, 0, 0, 0.4);
+font-family: 'Open Sans', sans-serif;
+}
+
+#menu a {
+font-size: 13px;
+color: #404040;
+display: block;
+margin: 0;
+padding: 0;
+padding: 10px;
+text-decoration: none;
+border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+text-align: center;
+}
+
+#menu a:last-child {
+border: none;
+}
+
+#menu a:hover {
+background-color: #f8f8f8;
+color: #404040;
+}
+
+#menu a.active {
+background-color: #3887be;
+color: #ffffff;
+}
+
+#menu a.active:hover {
+background: #3074a4;
+}
+</style>
+
+<nav id="menu"></nav>
+<div id="map"></div>
+
+<script>
+
+$.ajax('data/osm_allParks.kml').done(function(xml) {
+  parks = toGeoJSON.kml(xml);
+  return parks;
+});
+
+$.ajax('data/osm_walks.kml').done(function(xml) {
+  paths = toGeoJSON.kml(xml);
+  return paths;
+});
+
+$.ajax({
+  type: "GET",
+  url: 'data/gwnFinal.csv',
+  dataType: "text",
+  success: function(csvData) {
+		csv2geojson.csv2geojson(csvData, {
+	    latfield: 'Latitude',
+	    lonfield: 'Longitude',
+	    delimiter: ','
+	  }, function(err, data) {
+	    gm = data;
+			return gm;
+		});
+		console.log(gm);
+
+	}
+});
+
+
+mapboxgl.accessToken = 'pk.eyJ1IjoiamFyZ29uYXV0IiwiYSI6ImNrZWUybmR5ZjBicWMyc295NTR4N3I4OWIifQ.scaKTg7g6zt8i9_zk8NjWg';
+const map = new mapboxgl.Map({
+container: 'map',
+// Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+style: 'mapbox://styles/mapbox/satellite-v9',
+//style: 'mapbox://styles/mapbox/streets-v8', //stylesheet location
+center: [-4.171036, 50.376258], // starting position [lng, lat]
+zoom: 11 // starting zoom
+});
+
+// Wait until the map has finished loading.
+map.on('load', () => {
+
+map.addSource('parks', {
+	type: 'geojson',
+	data: parks,
+});
+map.addSource('paths', {
+	type: 'geojson',
+	data: paths,
+});
+map.addSource('gm', {
+	type: 'geojson',
+	data: gm,
+});
+		map.addLayer({
+			'id': 'parksLayer',
+			'type': 'fill',
+			'source': 'parks', // reference the data source
+			'layout': {
+				'visibility': "visible",
+			},
+			'paint': {
+				'fill-color': '#f7b32b',
+				'fill-opacity': 0.7,
+        'fill-outline-color': '#fff',
+			}
+		});
+		map.addLayer({
+			'id': 'pathsLayer',
+			'layerId': 'pathsLayer',
+					'type': 'line',
+					'source': 'paths',
+					'layout': {
+						'visibility': "visible",
+						'line-join': 'round',
+						'line-cap': 'round'
+					},
+					'paint': {
+						'line-color': '#fff',
+						'line-width': 2
+					}
+				});
+				map.addLayer({
+					'id': 'gmLayer',
+					'layerId': 'gmLayer',
+							'type': 'circle',
+							'source': 'gm',
+							'layout': {
+								'visibility': "visible",
+							},
+							'paint': {
+								'circle-radius': 8,
+                'circle-color': [
+                  'match', ['get','Theme'],
+                  'Biodiversity', '#ff6700',
+                  'Arts', '#e3d7ff',
+                  'Innovation', '#e36397',
+                  'Food', '#f5e663',
+                  'Heritage', '#63c7b2',
+                  'Marine', '#246eb9',
+                  'Gardening', '#a5d0a8',
+                  'Outdoors', '#49a078',
+                  'Climate', '#c879ff',
+                  '#f7b32b'
+                ],
+                'circle-stroke-color': '#fff',
+                'circle-stroke-width': 2,
+              }
+						});
+				console.log('layer styles', map.getStyle().layers);
+});
+
+// After the last frame rendered before the map enters an "idle" state.
+map.on('idle', () => {
+// If these layers were not added to the map, abort
+if (!map.getLayer('parksLayer') || !map.getLayer('pathsLayer') || !map.getLayer('gmLayer')) {
+return;
+}
+
+// Enumerate ids of the layers.
+const toggleableLayerIds = ['parksLayer', 'pathsLayer', 'gmLayer'];
+
+// Set up the corresponding toggle button for each layer.
+for (const id of toggleableLayerIds) {
+// Skip layers that already have a button set up.
+if (document.getElementById(id)) {
+continue;
+}
+
+// Create a link.
+const link = document.createElement('a');
+link.id = id;
+link.href = '#';
+link.textContent = id;
+link.className = 'active';
+
+// Show or hide layer when the toggle is clicked.
+link.onclick = function (e) {
+const clickedLayer = this.textContent;
+e.preventDefault();
+e.stopPropagation();
+
+const visibility = map.getLayoutProperty(
+clickedLayer,
+'visibility'
+);
+
+// Toggle layer visibility by changing the layout object's visibility property.
+if (visibility === 'visible') {
+map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+this.className = '';
+} else {
+this.className = 'active';
+map.setLayoutProperty(
+clickedLayer,
+'visibility',
+'visible'
+);
+}
+};
+
+// Create a popup, but don't add it to the map yet.
+const popup = new mapboxgl.Popup({
+closeButton: false,
+closeOnClick: false
+});
+
+map.on('mouseenter', 'parksLayer', (e) => {
+	// Change the cursor style as a UI indicator.
+	map.getCanvas().style.cursor = 'pointer';
+	// Copy coordinates array.
+	const coordinates = e.features[0].geometry.coordinates[0][0];
+	const description = e.features[0].properties.name;
+	console.log(e.features[0]);
+	// Ensure that if the map is zoomed out such that multiple
+	// copies of the feature are visible, the popup appears
+	// over the copy being pointed to.
+	while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+		coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+	}
+	// Populate the popup and set its coordinates
+	// based on the feature found.
+	popup.setLngLat(coordinates).setHTML(description).addTo(map);
+});
+
+map.on('mouseenter', 'gmLayer', (e) => {
+	// Change the cursor style as a UI indicator.
+	map.getCanvas().style.cursor = 'pointer';
+	// Copy coordinates array.
+	const coordinates = e.features[0].geometry.coordinates.slice();
+	const description = e.features[0].properties.Title;
+	console.log(e.features[0]);
+	// Ensure that if the map is zoomed out such that multiple
+	// copies of the feature are visible, the popup appears
+	// over the copy being pointed to.
+	while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+		coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+	}
+	// Populate the popup and set its coordinates
+	// based on the feature found.
+	popup.setLngLat(coordinates).setHTML(description).addTo(map);
+});
+
+map.on('mouseenter', 'pathsLayer', (e) => {
+	// Change the cursor style as a UI indicator.
+	map.getCanvas().style.cursor = 'pointer';
+	// Copy coordinates array.
+	console.log(e.features[0]);
+	const coordinates = e.features[0].geometry.coordinates[0].slice();
+	const description = e.features[0].properties.name;
+
+	// Ensure that if the map is zoomed out such that multiple
+	// copies of the feature are visible, the popup appears
+	// over the copy being pointed to.
+	while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+		coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+	}
+	// Populate the popup and set its coordinates
+	// based on the feature found.
+	popup.setLngLat(coordinates).setHTML(description).addTo(map);
+});
+
+map.on('mouseleave', ['parksLayer', 'gmLayer', 'pathsLayer'], () => {
+	map.getCanvas().style.cursor = '';
+	popup.remove();
+});
+
+const layers = document.getElementById('menu');
+layers.appendChild(link);
+}
+});
+</script>
+
+</body>
+</html>

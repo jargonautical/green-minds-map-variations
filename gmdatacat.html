@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+
+  <!-- TDP standard fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=Gothic+A1:wght@300;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Local CSS -->
+  <link rel="stylesheet" href="styles/gmstyle.css">
+  <link rel="stylesheet" href="styles/cardstyle.css">
+
+
+  <!-- Load plotly.js into the DOM -->
+  <script src="scripts/plotly-2.12.1.js" charset="utf-8"></script>
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>-->
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+
+  <!-- Favicons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://greenmindsplymouth.com/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://greenmindsplymouth.com/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://greenmindsplymouth.com/favicon-16x16.png">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+
+  <title>Green Minds Data Catalogue</title>
+
+</head>
+<body>
+  <h1>Green Minds Data Catalogue</h1>
+
+  <div class='container'>
+    <p>Search:</p>
+    <input type="text" id="searchInput" name="searchInput"><br><br>
+  </div>
+  <div class="container" id="results">
+  <div class="container" id="root">
+
+  </div>
+  <script>
+  $.ajax('data/gmDataCat2.json').done(function(data) {
+    filterData();
+
+    // Function to filter and display results
+function filterData() {
+  // Get the user input
+  var searchValue = document.getElementById("searchInput").value.toLowerCase();
+
+  // Filter the data based on the search value
+  var filteredData = data.filter(function(item) {
+    // Convert each item's values to lowercase for case-insensitive search
+    var name = item.name.toLowerCase();
+    var desc = item.description.toLowerCase();
+    var type = item.type.toLowerCase();
+
+    // Check if any property matches the search value
+    return name.includes(searchValue) || desc.includes(searchValue) || type.includes(searchValue);
+  });
+
+  // Display the filtered results
+  var resultsElement = document.getElementById("results");
+  resultsElement.innerHTML = ""; // Clear previous results
+
+  if (filteredData.length > 0) {
+    filteredData.forEach(function(item) {
+      var resultItem = document.createElement("div");
+      //resultItem.textContent = "Name: " + item.name + ", Description: " + item.description + ", Type: " + item.type;
+      resultsElement.appendChild(resultItem);
+
+      const card = document.createElement('div');
+      card.setAttribute('class', 'card');
+      resultItem.appendChild(card);
+
+      const thisname = document.createElement('H3');
+      if (item.type == 'portal') {
+        thisname.style = "background: var(--color-publisher);";
+      } else if (item.type == 'tool'){
+        thisname.style = "background: var(--color-tool);";
+      } else if (item.type == 'collection'){
+        thisname.style = "background: var(--color-collection);";
+      } else if (item.type == 'portal'){
+        thisname.style = "background: var(--color-portal);";
+      } else if (item.type == 'api'){
+        thisname.style = "background: var(--color-tool);";
+      } else if (item.type == 'publisher'){
+        thisname.style = "background: var(--color-portal);";
+      } else if (item.type == 'dashboard'){
+        thisname.style = "background: var(--color-tool);";
+      } else {
+        thisname.style = "background: var(--color-dataset);"
+      };
+      thisname.textContent = item.name;
+
+      const thisType = document.createElement('P');
+      thisType.textContent = item.type;
+
+      const thisdesc = document.createElement('P');
+      thisdesc.textContent = item.description;
+
+      const thisUrl = document.createElement('P');
+      thisUrl.innerHTML = `<a href=${item.url}>${item.url}</a>`;
+
+      const thisUse = document.createElement('P');
+      thisUse.textContent =  "Use this to: " + item.use_this_to;
+
+      const app = document.getElementById('results');
+      const container = document.createElement('div');
+      container.setAttribute('class', 'container');
+
+      card.appendChild(thisname);
+      //card.appendChild(thisType);
+      card.appendChild(thisdesc);
+      card.appendChild(thisUrl);
+      card.appendChild(thisUse);
+
+    });
+  } else {
+    resultsElement.textContent = "No results found.";
+  }
+}
+
+// Assuming the search input element has id "searchInput"
+var searchInput = document.getElementById("searchInput");
+
+// Attach an event listener to the search input
+searchInput.addEventListener("keyup", filterData);
+
+    });
+
+    // returns ok
+    /*
+    EXAMPLE
+    description: "UK’s largest independent producer of official statistics. Publish data related to the economy, population and society at national, regional and local levels. Conduct Census every 10 years."
+    name: "Office for National Statistics (ONS)"
+    publisher: "ONS"
+    type: "publisher"
+    update_freq: ""
+    url: "https://www.ons.gov.uk/"
+    use_this_to: ""
+    "﻿id": "1"
+    */
+
+
+  </script>
+</body>
