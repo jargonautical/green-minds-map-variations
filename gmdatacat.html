@@ -6,9 +6,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <!-- Bootstrap CSS -->
+  <!-- Bootstrap CSS
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous"> -->
 
   <!-- TDP standard fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,9 +17,7 @@
     rel="stylesheet">
 
   <!-- Local CSS -->
-  <link rel="stylesheet" href="styles/gmstyle.css">
-  <link rel="stylesheet" href="styles/cardstyle.css">
-
+  <link rel="stylesheet" href="styles/style.css">
 
   <!-- Load plotly.js into the DOM -->
   <script src="scripts/plotly-2.12.1.js" charset="utf-8"></script>
@@ -33,124 +31,157 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 
-
   <title>Green Minds Data Catalogue</title>
 
 </head>
 <body>
-  <h1>Green Minds Data Catalogue</h1>
+  <div>
+    <h1>Creating a data catalogue</h1>
+      <p>
+        As part of the Green Minds project, we thought it would be useful to
+        collate a data catalogue containing all the links and resources we
+        know about that are relevant to the project's themes.
+        Obviously this can't be all of them, because there's always something
+        new to discover! But it's a good place to start.<br><br>
+        Data catalogues are incredibly helpful things to have, because for any
+        analysis project the thing that takes the longest is almost always the
+        bit at the very beginning - working out whether the data you’re
+        looking for even exists. And if it does exist, can you have it? And if you
+        can, is it in the form you need? And it if is, is it good enough
+        quality for what you want to use it for?
+        <br><br>
+        So it’s always nice when someone else has done some of that work for
+        you. Shout out to the publishers and curators of good quality open
+        data who make sure that what they bring together is as good as it can
+        possibly be and, perhaps more importantly, well-documented.
+        Some of our favourite examples are <a href="https://www.nomisweb.co.uk/">Nomisweb</a>
+        for demonstrating the breadth and depth of government open data,
+        <a href="https://plymouth.thedata.place/">Plymouth City Council</a> as
+        an excellent showcase for local government transparency, and
+        <a href="https://openaq.org/">OpenAQ</a> for their accessible resource on national
+        air quality measurements.
+        <br><br>
+        Once you have the data, the next most difficult bit is figuring out
+        how to make it useful. What problem does it
+        solve? What question does it answer? How do you do the analysis and
+        create the visualisation that will show that in the most appropriate
+        way for the audience you have in mind?<br>
+        This data catalogue won't help you with that part, although here are
+        a few examples you might like to look at for inspiration.<br>
+      </p>
+        <ul>
+          <li>
+            Using the OpenAQ API: <a href="https://jargonautical.github.io/open-data-aqi/">Air quality map</a><br>
+          </li>
+          <li>
+            Using the Nomisweb data query tool: <a href="https://sandbox.thedata.place/data-mince.html">Demographic info by area</a><br>
+          </li>
+          <li>
+            Using Plymouth City Council data: <a href="https://sandbox.thedata.place/footfall.html">Footfall counts in parks</a><br>
+          </li>
+        </ul>
+        <p>
+          But we're not here to tell you what to do.
+        What we really want is to
+        make it possible for you to go out and get the data and make what
+        <strong>you</strong> want with it.
+      </p>
+      <h1>Explore the data catalogue</h1>
+      <div>
+        <p>Enter a search term to find some resources that might help you:<input type="text" id="searchInput" name="searchInput"></p>
+      </div>
+      <div id="root">
+        <script>
+        $.ajax('data/gmDataCat2.json').done(function(data) {
+          filterData();
+          // Function to filter and display results
+          function filterData() {
+            // Get the user input
+            var searchValue = document.getElementById("searchInput").value.toLowerCase();
+            // Filter the data based on the search value
+            var filteredData = data.filter(function(item) {
+              // Convert each item's values to lowercase for case-insensitive search
+              var name = item.name.toLowerCase();
+              var desc = item.description.toLowerCase();
+              var type = item.type.toLowerCase();
+              // Check if any property matches the search value
+              return name.includes(searchValue) || desc.includes(searchValue) || type.includes(searchValue);
+            });
+            // Display the filtered results
 
-  <div class='container'>
-    <p>Search:</p>
-    <input type="text" id="searchInput" name="searchInput"><br><br>
+            var resultsElement = document.getElementById("root");
+            resultsElement.setAttribute('class', 'container');
+            resultsElement.innerHTML = ""; // Clear previous results
+            if (filteredData.length > 0) {
+              filteredData.forEach(function(item) {
+                // weirdness is happening here with container vs result item
+                // TODO resolve this
+                var resultItem = document.createElement("div");
+                //resultItem.textContent = "Name: " + item.name + ", Description: " + item.description + ", Type: " + item.type;
+                resultsElement.appendChild(resultItem);
+                const card = document.createElement('div');
+                card.setAttribute('class', 'card');
+                resultItem.appendChild(card);
+
+                // attempt at card width workaround
+                //const cardHead = document.createElement('P');
+                //cardHead.textContent = "|__________| at least this wide |___________|";
+
+                const thisname = document.createElement('H3');
+                if (item.type == 'portal') {
+                  thisname.style = "background: var(--color-publisher);";
+                } else if (item.type == 'tool'){
+                  thisname.style = "background: var(--color-tool);";
+                } else if (item.type == 'collection'){
+                  thisname.style = "background: var(--color-collection);";
+                } else if (item.type == 'portal'){
+                  thisname.style = "background: var(--color-portal);";
+                } else if (item.type == 'api'){
+                  thisname.style = "background: var(--color-tool);";
+                } else if (item.type == 'publisher'){
+                  thisname.style = "background: var(--color-portal);";
+                } else if (item.type == 'dashboard'){
+                  thisname.style = "background: var(--color-tool);";
+                } else {
+                  thisname.style = "background: var(--color-dataset);"
+                };
+                thisname.textContent = item.name;
+
+                const thisType = document.createElement('P');
+                thisType.textContent = item.type;
+
+                const thisdesc = document.createElement('P');
+                thisdesc.textContent = item.description;
+
+                const thisUrl = document.createElement('P');
+                //thisUrl.innerHTML = `<a href=${item.url}>${item.url}</a>`;
+                thisUrl.innerHTML = `<a href=${item.url}>Take me there</a>`;
+
+                const thisUse = document.createElement('P');
+                thisUse.textContent =  "Suggested uses: " + item.use_this_to;
+
+
+
+                card.appendChild(thisname);
+                //card.appendChild(cardHead);
+                //card.appendChild(thisType);
+                card.appendChild(thisdesc);
+                card.appendChild(thisUrl);
+                card.appendChild(thisUse);
+
+              });
+            } else {
+              resultsElement.textContent = "No results found.";
+            }
+          }
+
+          // Assuming the search input element has id "searchInput"
+          var searchInput = document.getElementById("searchInput");
+
+          // Attach an event listener to the search input
+          searchInput.addEventListener("keyup", filterData);
+        });
+      </script>
+    </div>
   </div>
-  <div class="container" id="results">
-  <div class="container" id="root">
-
-  </div>
-  <script>
-  $.ajax('data/gmDataCat2.json').done(function(data) {
-    filterData();
-
-    // Function to filter and display results
-function filterData() {
-  // Get the user input
-  var searchValue = document.getElementById("searchInput").value.toLowerCase();
-
-  // Filter the data based on the search value
-  var filteredData = data.filter(function(item) {
-    // Convert each item's values to lowercase for case-insensitive search
-    var name = item.name.toLowerCase();
-    var desc = item.description.toLowerCase();
-    var type = item.type.toLowerCase();
-
-    // Check if any property matches the search value
-    return name.includes(searchValue) || desc.includes(searchValue) || type.includes(searchValue);
-  });
-
-  // Display the filtered results
-  var resultsElement = document.getElementById("results");
-  resultsElement.innerHTML = ""; // Clear previous results
-
-  if (filteredData.length > 0) {
-    filteredData.forEach(function(item) {
-      var resultItem = document.createElement("div");
-      //resultItem.textContent = "Name: " + item.name + ", Description: " + item.description + ", Type: " + item.type;
-      resultsElement.appendChild(resultItem);
-
-      const card = document.createElement('div');
-      card.setAttribute('class', 'card');
-      resultItem.appendChild(card);
-
-      const thisname = document.createElement('H3');
-      if (item.type == 'portal') {
-        thisname.style = "background: var(--color-publisher);";
-      } else if (item.type == 'tool'){
-        thisname.style = "background: var(--color-tool);";
-      } else if (item.type == 'collection'){
-        thisname.style = "background: var(--color-collection);";
-      } else if (item.type == 'portal'){
-        thisname.style = "background: var(--color-portal);";
-      } else if (item.type == 'api'){
-        thisname.style = "background: var(--color-tool);";
-      } else if (item.type == 'publisher'){
-        thisname.style = "background: var(--color-portal);";
-      } else if (item.type == 'dashboard'){
-        thisname.style = "background: var(--color-tool);";
-      } else {
-        thisname.style = "background: var(--color-dataset);"
-      };
-      thisname.textContent = item.name;
-
-      const thisType = document.createElement('P');
-      thisType.textContent = item.type;
-
-      const thisdesc = document.createElement('P');
-      thisdesc.textContent = item.description;
-
-      const thisUrl = document.createElement('P');
-      thisUrl.innerHTML = `<a href=${item.url}>${item.url}</a>`;
-
-      const thisUse = document.createElement('P');
-      thisUse.textContent =  "Use this to: " + item.use_this_to;
-
-      const app = document.getElementById('results');
-      const container = document.createElement('div');
-      container.setAttribute('class', 'container');
-
-      card.appendChild(thisname);
-      //card.appendChild(thisType);
-      card.appendChild(thisdesc);
-      card.appendChild(thisUrl);
-      card.appendChild(thisUse);
-
-    });
-  } else {
-    resultsElement.textContent = "No results found.";
-  }
-}
-
-// Assuming the search input element has id "searchInput"
-var searchInput = document.getElementById("searchInput");
-
-// Attach an event listener to the search input
-searchInput.addEventListener("keyup", filterData);
-
-    });
-
-    // returns ok
-    /*
-    EXAMPLE
-    description: "UK’s largest independent producer of official statistics. Publish data related to the economy, population and society at national, regional and local levels. Conduct Census every 10 years."
-    name: "Office for National Statistics (ONS)"
-    publisher: "ONS"
-    type: "publisher"
-    update_freq: ""
-    url: "https://www.ons.gov.uk/"
-    use_this_to: ""
-    "﻿id": "1"
-    */
-
-
-  </script>
 </body>
